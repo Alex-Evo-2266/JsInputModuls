@@ -34,9 +34,9 @@ export function circleRange(root,options={}) {
                   const cR = radius - (stroke_width + padding)*index
                   return(`
                     <g data-el="group" data-id="${index}">
-                    <circle class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>
-                    <circle class="circleRange-indicator" data-type="${item.type}" data-el="indicator" cx="${x}" cy="${y}" r="${cR}"></circle>
-                    <circle class="circleRange-point" data-type="${item.type}" data-el="point" cx="${x}" cy="${y}" r="${cR}"></circle>
+                    ${(!item.backCircle || !item.backCircle.delete)?`<circle class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
+                    ${(!item.indicator ||!item.indicator.delete)?`<circle class="circleRange-indicator" data-type="${item.type}" data-el="indicator" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
+                    ${(!item.point ||!item.point.delete)?`<circle class="circleRange-point" data-type="${item.type}" data-el="point" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
                     </g>
                     `)
                 }).join('')}
@@ -100,16 +100,20 @@ export function circleRange(root,options={}) {
       let data = proxy.items[item.dataset.id].data
 
       const base = item.querySelector('[data-el="base"]')
-      const confBase = config.backCircle || {}
-      scalePaint(base,100,style,0,100,confBase.color,confBase.width)
-
+      if(base){
+        const confBase = config.backCircle || {}
+        scalePaint(base,100,style,0,100,confBase.color,confBase.width)
+      }
       const indicator = item.querySelector('[data-el="indicator"]')
-      const confIndicator = config.indicator || {}
-      scalePaint(indicator,data,style,min,max,proxy.items[item.dataset.id].color,confIndicator.width)
-
+      if(indicator){
+        const confIndicator = config.indicator || {}
+        scalePaint(indicator,data,style,min,max,proxy.items[item.dataset.id].color,confIndicator.width)
+      }
       const point = item.querySelector('[data-el="point"]')
-      const confPoint = config.point || {}
-      scalePaint(point,data,style,min,max,confPoint.color,confPoint.width)
+      if (point) {
+        const confPoint = config.point || {}
+        scalePaint(point,data,style,min,max,confPoint.color||"#fff",confPoint.width)
+      }
     });
   }
 
