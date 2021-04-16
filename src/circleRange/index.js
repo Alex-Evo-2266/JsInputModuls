@@ -4,16 +4,11 @@ export function circleRange(root,options={}) {
   const min_side = (height<width)?height:width
   let raf
 
-  const circles = options.circles || [{
-    type:"indicator",
-    size:"circle",
-    style:"line"
-  }]
+  const circles = options.circles || [{}]
   const count_circle = circles.length
   const stroke_width = options.width || 20
   const x = options.x || width / 2
   const y = options.y || height / 2
-  const fonColor = options.color || "#555"
   const padding = options.padding || 5
   const margin = options.margin || 0
   const radius = options.r || (min_side / 2) - margin*2 - stroke_width/2
@@ -27,21 +22,22 @@ export function circleRange(root,options={}) {
   })
   proxy.items = []
   for (var i = 0; i < count_circle; i++) {
-    proxy.items[i] = {data:0,function:()=>{},color:circles[i].color}
+    proxy.items[i] = {data:0,function:()=>{},color:(circles[i].indicator)?circles[i].indicator.color:"#f00"}
   }
 
   root.addEventListener('mousedown',mousedown)
   document.addEventListener('mouseup',mouseup)
-
-  // <circle class="circleRange-point" data-el="point" data-id="${index}" data-size="${item.size||"circle"}" data-style="${item.style||"line"}" data-type="${item.type||"indicator"}" cx="${x}" cy="${y}" r="${cR}"></circle>
 
   let c = document.createElement('div')
   c.innerHTML = `<svg class="circle-indicator">
                 ${circles.map((item,index)=>{
                   const cR = radius - (stroke_width + padding)*index
                   return(`
-                    <circle class="circleRange-base" data-el="base" data-size="${item.size||"circle"}" cx="${x}" cy="${y}" r="${cR}"></circle>
-                    <circle class="circleRange-indicator" data-el="indicator" data-id="${index}" data-size="${item.size||"circle"}" data-style="${item.style||"line"}" data-type="${item.type||"indicator"}" cx="${x}" cy="${y}" r="${cR}"></circle>
+                    <g data-el="group" data-id="${index}">
+                    <circle class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>
+                    <circle class="circleRange-indicator" data-type="${item.type}" data-el="indicator" cx="${x}" cy="${y}" r="${cR}"></circle>
+                    <circle class="circleRange-point" data-type="${item.type}" data-el="point" cx="${x}" cy="${y}" r="${cR}"></circle>
+                    </g>
                     `)
                 }).join('')}
               </svg>`
@@ -51,13 +47,13 @@ export function circleRange(root,options={}) {
   function mousedown(event) {
     const type = event.target.dataset.type
     if(type === "range"){
-      const index = event.target.dataset.id
+      const index = event.target.parentNode.dataset.id
       const max = circles[index].max || 100
       const min = circles[index].min || 0
       document.onmousemove = (e)=>{
         let oldval = proxy.items[index].data
         let range = event.target
-        const sizeLine = getsizeline(range)
+        const sizeLine = getsizeline(range.r.baseVal.value,circles[index].style)
         let center_x = (range.r.baseVal.value) + range.getBoundingClientRect().left
         let center_y = (range.r.baseVal.value) + range.getBoundingClientRect().top
         let pos_x = e.pageX
@@ -94,21 +90,26 @@ export function circleRange(root,options={}) {
   }
 
   function paint() {
-    const baseCircles = root.querySelectorAll('[data-el="base"]')
-    baseCircles.forEach((item,i) => {
-      let conf = circles[i].backCircle || {}
-      conf.color = conf.color||fonColor
-      conf.width = conf.width||stroke_width
-      scalePaint(item,100,conf)
-    });
-    const indicators = root.querySelectorAll('[data-el="indicator"]')
-    indicators.forEach((item, i) => {
-      let conf = {}
-      conf.max = circles[i].max || 100
-      conf.min = circles[i].min || 0
-      conf.color = proxy.items[i].color || circles[i].color || "#f00"
-      conf.width = circles[i].width || stroke_width
-      scalePaint(item,proxy.items[i].data,conf)
+    const groups = root.querySelectorAll('[data-el="group"]')
+    groups.forEach((item) => {
+      const config = circles[item.dataset.id]
+      const min = config.min || 0
+      const max = config.max || 100
+      const style = config.style || "circle"
+      const type = config.type || "indicator"
+      let data = proxy.items[item.dataset.id].data
+
+      const base = item.querySelector('[data-el="base"]')
+      const confBase = config.backCircle || {}
+      scalePaint(base,100,style,0,100,confBase.color,confBase.width)
+
+      const indicator = item.querySelector('[data-el="indicator"]')
+      const confIndicator = config.indicator || {}
+      scalePaint(indicator,data,style,min,max,proxy.items[item.dataset.id].color,confIndicator.width)
+
+      const point = item.querySelector('[data-el="point"]')
+      const confPoint = config.point || {}
+      scalePaint(point,data,style,min,max,confPoint.color,confPoint.width)
     });
   }
 
@@ -136,53 +137,77 @@ export function circleRange(root,options={}) {
     proxy.items = arr
   }
 
+  function getLine(index) {
+    return {
+      set value(num){
+        setData(index,num)
+      },
+      get value(){
+        return proxy.items[index].data
+      },
+      linc(fun){
+        linc(index,fun)
+      },
+      set color(color){
+        setColor(index,color)
+      },
+      get color(){
+        return proxy.items[index].color
+      }
+    }
+  }
+
+  function scalePaint(item,data,style,min,max,color,width) {
+    const defStrokeDashoffset = lineParams(item.r.baseVal.value,style)[0]
+    const sizeScale = lineParams(item.r.baseVal.value,style)[1]
+    const arc = ((data-min)*sizeScale)/(max-min)
+
+    item.style.stroke = color || "#333"
+    item.style.strokeWidth = width || 20
+
+    if(item.dataset.el==="point"){
+      if(data === max && style === "semicircle")
+        item.style.strokeDashoffset = 0
+      else
+        item.style.strokeDashoffset = defStrokeDashoffset - arc
+      item.style.strokeDasharray = `${0}, ${item.r.baseVal.value*Math.PI*2}`
+    }else{
+      item.style.strokeDashoffset = defStrokeDashoffset
+      item.style.strokeDasharray = `${arc}, ${item.r.baseVal.value*Math.PI*2-arc}`
+    }
+  }
+
   return{
     destroy(){
       root.removeEventListener('mousedown',mousedown)
       document.removeEventListener('mouseup',mouseup)
     },
-    setData,
-    linc,
-    setColor
+    getLine
   }
 }
 
-function scalePaint(item,data,{max = 100, min = 0,color = "#f00", width = 20}) {
-  let defStrokeDashoffset
-  let sizeScale
-  item.style.stroke = color
-  item.style.strokeWidth = width
-  if(item.dataset.size === "circle"){
-    defStrokeDashoffset = item.r.baseVal.value*Math.PI
-    sizeScale = item.r.baseVal.value*Math.PI*2
-  }
-  else if(item.dataset.size === "semicircle") {
-    defStrokeDashoffset = item.r.baseVal.value*Math.PI
-    sizeScale = item.r.baseVal.value*Math.PI
-  }
-  else if(item.dataset.size === "brokenСircle") {
-    defStrokeDashoffset = item.r.baseVal.value*Math.PI*1.25
-    sizeScale = item.r.baseVal.value*Math.PI*1.5
-  }
-  const arc = ((data-min)*sizeScale)/(max-min)
-
-  if(item.dataset.style === "point"){
-    if(data === max && item.dataset.size === "semicircle")
-      item.style.strokeDashoffset = 0
-    else
-      item.style.strokeDashoffset = defStrokeDashoffset - arc
-    item.style.strokeDasharray = `${0}, ${item.r.baseVal.value*Math.PI*2}`
-  }
-  else {
-    item.style.strokeDashoffset = defStrokeDashoffset
-    item.style.strokeDasharray = `${arc}, ${item.r.baseVal.value*Math.PI*2-arc}`
-  }
+function getsizeline(r,style) {
+  return (style === "semicircle")?
+        [r*Math.PI,180]:
+        (style === "brokenСircle")?
+        [r*Math.PI*1.5, 270]:
+        [r*Math.PI*2, 360]
 }
 
-function getsizeline(item) {
-  return (item.dataset.size === "semicircle")?
-        [item.r.baseVal.value*Math.PI,180]:
-        (item.dataset.size === "brokenСircle")?
-        [item.r.baseVal.value*Math.PI*1.5, 270]:
-        [item.r.baseVal.value*Math.PI*2, 360]
+function lineParams(r,style) {
+  if(style === "semicircle")
+    return [
+      r*Math.PI,
+      r*Math.PI
+    ]
+  else if(style === "brokenСircle")
+    return [
+      r*Math.PI*1.25,
+      r*Math.PI*1.5
+    ]
+  else
+  return [
+    r*Math.PI,
+    r*Math.PI*2
+  ]
 }

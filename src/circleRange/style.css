@@ -8,18 +8,15 @@ svg{
   height: 100%;
 }
  svg.circle-indicator circle{
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke: #555;
-  stroke-width: 20;
+  fill:none;
   stroke-linecap: round;
-}/*
+}
+/*
 svg.circle-indicator circle[data-el="indicator"]{
   stroke: rgba(255, 0, 0, 1);
-  /* display: none; */
-/* } */
-/* svg.circle-indicator circle[data-el="range"]{
+   /* display: none;  */
+ }
+ svg.circle-indicator circle[data-el="range"]{
   stroke: #36f;
   stroke-width:30;
 } */

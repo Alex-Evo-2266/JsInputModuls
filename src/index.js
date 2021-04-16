@@ -11,39 +11,28 @@ const test = document.getElementById("test-div")
 const renge = circleRange(test,{margin:5,circles:[
   {
     type:"range",
-    size:"circle",
-    style:"line",
-    color: "#f00",
+    style:"brokenСircle",
+    max:100,
+    min:0,
+    indicator:{
+      color:"#0f0",
+      width: 20
+    },
+    point:{
+      color:"#0ff",
+      width: 30
+    },
     backCircle:{
       color: "#400",
-      width: 10
+      width: 20
     }
-  },
-  {
-    type:"range",
-    size:"semicircle",
-    style:"point"
-  },
-  {
-    type:"range",
-    size:"brokenСircle",
-    style:"line"
-  },
-  {
-    type:"range",
-    size:"brokenСircle",
-    style:"line"
   }
 ]})
-renge.setData(0,60)
-renge.setData(1,86)
-renge.setData(2,45)
-renge.setData(3,56)
 
-renge.linc(0,(data)=>{
-  console.log(`0 - ${data}`)
-  // renge.setData(0,data)
+const line1 = renge.getLine(0)
+console.log(line1);
+line1.value = 45
+line1.color = "#00f"
+line1.linc((data)=>{
+  console.log(data)
 })
-renge.linc(1,(data)=>console.log(`1 - ${data}`))
-
-renge.setData(1,45)
