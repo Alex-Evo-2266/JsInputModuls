@@ -6,6 +6,7 @@ const DPI_HEIGHT = HEIGHT*2
 function noop() {}
 
 export function sliderChart(root,data,DPI_WIDTH) {
+  if(!root)return
   const WIDTH = DPI_WIDTH/2
   const MIN_WIDTH = WIDTH * 0.05
   const canvas = root.querySelector('canvas')

@@ -2,19 +2,19 @@ import {toDate,isOver,circle,line,computeBoundaries,toCoords,computeYRatio,compu
 import {sliderChart} from './sliderChart'
 import {tooltip} from './tooltip'
 
-const WIDTH = 600
-const HEIGHT = 200
-const PADDING = 40
-const DPI_WIDTH = WIDTH*2
-const DPI_HEIGHT = HEIGHT*2
-const VIEW_HEIGHT = DPI_HEIGHT - PADDING * 2
-const VIEW_WIDTH = DPI_WIDTH
-const ROWS_COUNT = 5
+export function chart(root,optinos={}) {
+  const WIDTH = optinos.width||600
+  const HEIGHT = optinos.height||200
+  const PADDING = optinos.padding||40
+  const DPI_WIDTH = WIDTH*2
+  const DPI_HEIGHT = HEIGHT*2
+  const VIEW_HEIGHT = DPI_HEIGHT - PADDING * 2
+  const VIEW_WIDTH = DPI_WIDTH
+  const ROWS_COUNT = optinos.rows||5
+  const COLUS_COUNT = optinos.columns||4
 
-export function chart(root,data) {
   const canvas = root.querySelector('[data-el="main"]')
   const tip = tooltip(root.querySelector('[data-el="tg-chart-tooltip"]'))
-  const slider = sliderChart(root.querySelector('[data-el="slider"]'),data,DPI_WIDTH)
   const ctx = canvas.getContext('2d')
   let raf
   canvas.style.width = WIDTH + 'px'
@@ -32,10 +32,32 @@ export function chart(root,data) {
       return result
     }
   })
+  proxy.data={
+    columns:[
+      [
+        "x",
+      ],
+      [
+        "y0",
+      ],
+    ],
+    types:{
+      y0: 'line',
+      x: 'x',
+    },
+    names: {
+      y0: '#0',
+    },
+    colors: {
+      y0: '#3DC23F',
+    },
+  }
 
-  slider.subscribe((pos)=>{
-    proxy.pos = pos
-  })
+  const slider = sliderChart(root.querySelector('[data-el="slider"]'),proxy.data,DPI_WIDTH)
+  if(slider)
+    slider.subscribe((pos)=>{
+      proxy.pos = pos
+    })
 
   function mousemove({clientX, clientY}) {
     const {left, top} = canvas.getBoundingClientRect()
@@ -60,11 +82,13 @@ export function chart(root,data) {
   function paint() {
     clear()
 
-    const length = data.columns[0].length
-    const leftIndex = Math.round((length * proxy.pos[0])/100)
-    const rightIndex = Math.round((length * proxy.pos[1])/100)
+    const length = proxy.data.columns[0].length
+    const leftpoz = (proxy.pos&&proxy.pos[0]!==null)?proxy.pos[0]:(WIDTH/2<length)?length-WIDTH/4:1
+    const rightpoz = (proxy.pos&&proxy.pos[1])?proxy.pos[1]:length
+    const leftIndex = Math.round((length * leftpoz)/100)
+    const rightIndex = Math.round((length * rightpoz)/100)
 
-    const columns = data.columns.map((col)=>{
+    const columns = proxy.data.columns.map((col)=>{
       const res = col.slice(leftIndex,rightIndex)
       if(typeof res[0]!=="string"){
         res.unshift(col[0])
@@ -72,14 +96,14 @@ export function chart(root,data) {
       return res
     })
 
-    const [yMin, yMax] = computeBoundaries({columns,types:data.types})
+    const [yMin, yMax] = computeBoundaries({columns,types:proxy.data.types})
 
     const yRatio = computeYRatio(VIEW_HEIGHT,yMin,yMax)
     const xRatio = computeXRatio(VIEW_WIDTH,columns[0].length)
 
 
-    const yData = columns.filter((col)=>data.types[col[0]]==="line")
-    const xData = columns.filter((col)=>data.types[col[0]]!=="line")[0]
+    const yData = columns.filter((col)=>proxy.data.types[col[0]]==="line")
+    const xData = columns.filter((col)=>proxy.data.types[col[0]]!=="line")[0]
 
     yAxis(yMin, yMax)
     xAxis(xData,yData,xRatio)
@@ -87,7 +111,7 @@ export function chart(root,data) {
     yData
     .map(toCoords(xRatio,yRatio,DPI_HEIGHT,PADDING,yMin))
     .forEach((coords,idx) => {
-      const color = data.colors[yData[idx][0]]
+      const color = proxy.data.colors[yData[idx][0]]
       line(ctx,coords, {color})
 
       for (const [x,y] of coords) {
@@ -100,8 +124,7 @@ export function chart(root,data) {
   }
 
   function xAxis(xData,yData,xRatio){
-    const colusCount = 6
-    const step = Math.round(xData.length/colusCount)
+    const step = Math.round(xData.length/COLUS_COUNT)
     ctx.beginPath()
     for (var i = 1; i < xData.length; i++) {
       const x = i * xRatio
@@ -119,8 +142,8 @@ export function chart(root,data) {
         tip.show(proxy.mouse.tooltip,{
           title: toDate(xData[i]),
           items:yData.map((col)=>({
-            color:data.colors[col[0]],
-            name:data.names[col[0]],
+            color:proxy.data.colors[col[0]],
+            name:proxy.data.names[col[0]],
             value:col[i + 1],
           })),
         })
@@ -158,6 +181,12 @@ export function chart(root,data) {
       cancelAnimationFrame(ref)
       canvas.removeEventListener('mousemove',mousemove)
       canvas.removeEventListener('mouseleave',mouseleave)
+    },
+    set data(data1){
+      proxy.data = data1
+    },
+    get data(){
+      return proxy.data
     }
   }
 }

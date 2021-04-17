@@ -5,8 +5,12 @@ import './chart/style.scss'
 import './circleRange/style.css'
 
 const t = document.getElementById("tg-chart")
-const graf = chart(t,dataGraf)
+const graf = chart(t)
 graf.init()
+graf.data = dataGraf
+
+
+
 const test = document.getElementById("test-div")
 const renge = circleRange(test,{margin: 5,circles:[
   {
