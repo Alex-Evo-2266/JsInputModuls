@@ -9,8 +9,11 @@ svg{
 }
  svg.circle-indicator circle{
   fill:none;
-  stroke-linecap: round;
+  /* stroke-linecap: round; */
 }
+ svg.circle-indicator text{
+   font-size: 10px;
+ }
 /*
 svg.circle-indicator circle[data-el="indicator"]{
   stroke: rgba(255, 0, 0, 1);

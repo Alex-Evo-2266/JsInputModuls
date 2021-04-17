@@ -11,7 +11,7 @@ const test = document.getElementById("test-div")
 const renge = circleRange(test,{margin: 5,circles:[
   {
     type:"range",
-    style: "semicircle",
+    style: "brokenСircle",
     min:0,
     max:100,
     backCircle:{
@@ -24,15 +24,29 @@ const renge = circleRange(test,{margin: 5,circles:[
     },
     point:{
       color:"#ff0",
-      width:30
+      width:30,
+    }
+  }
+  ,{
+    type:"indicator",
+    style: "circle",
+    min:0,
+    max:200,
+    indicator:{
+    },
+    point:{
+      delete:true
     }
   }
 ]})
 
 const line1 = renge.getLine(0)
+const line2 = renge.getLine(1)
 console.log(line1);
-line1.value = 45
-// line1.color = "#00f"
+// line1.value = 45
+line1.color = "#00f"
+line2.color = "#00f"
 line1.linc((data)=>{
   console.log(data)
+  line2.value=data
 })

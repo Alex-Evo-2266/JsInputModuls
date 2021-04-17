@@ -22,7 +22,7 @@ export function circleRange(root,options={}) {
   })
   proxy.items = []
   for (var i = 0; i < count_circle; i++) {
-    proxy.items[i] = {data:0,function:()=>{},color:(circles[i].indicator)?circles[i].indicator.color:"#f00"}
+    proxy.items[i] = {data:0,function:()=>{},color:(circles[i].indicator&&circles[i].indicator.color)?circles[i].indicator.color:"#f00"}
   }
 
   root.addEventListener('mousedown',mousedown)
@@ -53,7 +53,7 @@ export function circleRange(root,options={}) {
       document.onmousemove = (e)=>{
         let oldval = proxy.items[index].data
         let range = event.target
-        const sizeLine = getsizeline(range.r.baseVal.value,circles[index].style)
+        const sizeLine = getsizeline(circles[index].style)
         let center_x = (range.r.baseVal.value) + range.getBoundingClientRect().left
         let center_y = (range.r.baseVal.value) + range.getBoundingClientRect().top
         let pos_x = e.pageX
@@ -61,18 +61,18 @@ export function circleRange(root,options={}) {
         let delta_y =  center_y - pos_y
         let delta_x = center_x - pos_x
         let angle = Math.atan2(delta_y, delta_x) * (180 / Math.PI)
-        if(sizeLine[1] === 270) angle = angle + 45
+        if(sizeLine === 270) angle = angle + 45
 
         if(angle < 0)
           angle = 360 + angle
         if(angle < 0)
           angle = 0
-        if(angle>sizeLine[1] && oldval>90)
-          angle=sizeLine[1]
-        else if(angle>sizeLine[1] && oldval<90)
+        if(angle>sizeLine && oldval>90)
+          angle=sizeLine
+        else if(angle>sizeLine && oldval<90)
           angle = 0
 
-        let oldRange = (sizeLine[1] - 0)
+        let oldRange = (sizeLine - 0)
         let newRange = (max - min)
         let newValue = (((angle - 0) * newRange) / oldRange) + min
         if(proxy.items[index].data !== Math.round(newValue)){
@@ -96,23 +96,25 @@ export function circleRange(root,options={}) {
       const min = config.min || 0
       const max = config.max || 100
       const style = config.style || "circle"
-      const type = config.type || "indicator"
       let data = proxy.items[item.dataset.id].data
 
       const base = item.querySelector('[data-el="base"]')
+      const confBase = config.backCircle || {}
       if(base){
-        const confBase = config.backCircle || {}
+        base.style.strokeLinecap = (config.rounding)?"round":""
         scalePaint(base,100,style,0,100,confBase.color,confBase.width)
       }
       const indicator = item.querySelector('[data-el="indicator"]')
+      const confIndicator = config.indicator || {}
       if(indicator){
-        const confIndicator = config.indicator || {}
+        indicator.style.strokeLinecap = (config.rounding)?"round":""
         scalePaint(indicator,data,style,min,max,proxy.items[item.dataset.id].color,confIndicator.width)
       }
       const point = item.querySelector('[data-el="point"]')
+      const confPoint = config.point || {}
       if (point) {
-        const confPoint = config.point || {}
-        scalePaint(point,data,style,min,max,confPoint.color||"#fff",confPoint.width)
+        point.style.strokeLinecap = "round"
+        scalePaint(point,data,style,min,max,confPoint.color||"#f00",confPoint.width)
       }
     });
   }
@@ -190,12 +192,12 @@ export function circleRange(root,options={}) {
   }
 }
 
-function getsizeline(r,style) {
+function getsizeline(style) {
   return (style === "semicircle")?
-        [r*Math.PI,180]:
+        180:
         (style === "brokenСircle")?
-        [r*Math.PI*1.5, 270]:
-        [r*Math.PI*2, 360]
+        270:
+        360
 }
 
 function lineParams(r,style) {
