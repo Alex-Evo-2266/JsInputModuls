@@ -1,6 +1,5 @@
 
 /.cache
-/dist
 # dependencies
 /node_modules
 /.pnp

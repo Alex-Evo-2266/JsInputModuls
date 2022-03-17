@@ -1,6 +1,8 @@
 
-export function circleRange(root,options={}) {
-  const {height, width} = root.getBoundingClientRect()
+export function circleRange(root,widthroot,heightroot,options={}) {
+  // const {height, width} = root.getBoundingClientRect()
+  const height = heightroot
+  const width = widthroot
   const min_side = (height<width)?height:width
   let raf
 
@@ -34,15 +36,19 @@ export function circleRange(root,options={}) {
                   const cR = radius - (stroke_width + padding)*index
                   return(`
                     <g data-el="group" data-id="${index}">
-                    ${(!item.backCircle || !item.backCircle.delete)?`<circle class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
-                    ${(!item.indicator ||!item.indicator.delete)?`<circle class="circleRange-indicator" data-type="${item.type}" data-el="indicator" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
-                    ${(!item.point ||!item.point.delete)?`<circle class="circleRange-point" data-type="${item.type}" data-el="point" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
+                    ${(!item.backCircle || !item.backCircle.delete)?`<circle fill="none" class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
+                    ${(!item.indicator ||!item.indicator.delete)?`<circle fill="none" class="circleRange-indicator" data-type="${item.type}" data-el="indicator" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
+                    ${(!item.point ||!item.point.delete)?`<circle fill="none" class="circleRange-point" data-type="${item.type}" data-el="point" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
                     </g>
                     `)
                 }).join('')}
               </svg>`
   const $svg = c.firstChild
-  root.append($svg)
+  c.style.width = widthroot + "px"
+  c.style.height = heightroot + "px"
+  $svg.style.width = "100%"
+  $svg.style.height = "100%"
+  root.append(c)
 
   function mousedown(event) {
     const type = event.target.dataset.type
