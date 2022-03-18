@@ -1,5 +1,5 @@
-import {circleRange as cr} from '../src/circleRange/index.js'
+import {circleInput as cr} from '../src/circleInput/circleInput.js'
 
-export function circleRange(root,w,h,options={}){
+export function circleInput(root,w,h,options={}){
   return cr(root,w,h,options)
 }

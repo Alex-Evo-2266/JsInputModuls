@@ -1,5 +1,5 @@
 
-export function circleRange(root,widthroot,heightroot,options={}) {
+export function circleInput(root,widthroot,heightroot,options={}) {
   // const {height, width} = root.getBoundingClientRect()
   const height = heightroot
   const width = widthroot
@@ -33,7 +33,7 @@ export function circleRange(root,widthroot,heightroot,options={}) {
   let c = document.createElement('div')
   c.innerHTML = `<svg class="circle-indicator">
                 ${circles.map((item,index)=>{
-                  const cR = radius - (stroke_width + padding)*index
+                  const cR = item?.radius ?? radius - (stroke_width + padding)*index
                   return(`
                     <g data-el="group" data-id="${index}">
                     ${(!item.backCircle || !item.backCircle.delete)?`<circle fill="none" class="circleRange-base" data-el="base" data-type="base" cx="${x}" cy="${y}" r="${cR}"></circle>`:""}
