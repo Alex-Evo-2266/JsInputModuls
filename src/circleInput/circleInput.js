@@ -1,6 +1,17 @@
 
 export function circleInput(root,widthroot,heightroot,options={}) {
   // const {height, width} = root.getBoundingClientRect()
+  if (!root)
+  {
+    console.error("circleInput: root component not found")
+    return
+  }
+  if (!widthroot || !heightroot)
+  {
+    console.error("circleInput: size component not found")
+    return
+  }
+
   const height = heightroot
   const width = widthroot
   const min_side = (height<width)?height:width
