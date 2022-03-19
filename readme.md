@@ -3,10 +3,21 @@
 js module adding a circular indicator.
 
 ---
+* [Install](#Install)
 * [Usage](#Usage)
   * [Base](#Base)
   * [Advanced](#Advanced)
   * [Examples](#Examples)
+---
+
+<a id="Install"></a>
+
+## Install
+
+```bash
+npm i jsinputmoduls
+```
+
 ---
 
 <a id="Usage"></a>
