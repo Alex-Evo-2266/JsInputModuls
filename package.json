@@ -1,9 +1,9 @@
 {
-  "name": "jscastominputelement",
+  "name": "JsInputModuls",
   "version": "0.0.1",
   "description": "library that implements various input elements.",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "index.js",
+  "module": "index.js",
   "scripts": {
   },
   "repository": {

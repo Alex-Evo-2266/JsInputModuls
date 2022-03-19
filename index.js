@@ -131,7 +131,7 @@ export function circleInput(root,widthroot,heightroot,options={}) {
       const confPoint = config.point || {}
       if (point) {
         point.style.strokeLinecap = "round"
-        scalePaint(point,data,style,min,max,confPoint.color||"#f00",confPoint.width)
+        scalePaint(point,data,style,min,max,confPoint.color||proxy.items[item.dataset.id].color,confPoint.width)
       }
     });
   }
