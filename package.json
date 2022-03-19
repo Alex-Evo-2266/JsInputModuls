@@ -1,6 +1,6 @@
 {
-  "name": "JsInputModuls",
-  "version": "0.0.1",
+  "name": "jsinputmoduls",
+  "version": "1.0.0",
   "description": "library that implements various input elements.",
   "main": "index.js",
   "module": "index.js",
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Alex-Evo-2266/JsModuls.git"
+    "url": "git+https://github.com/Alex-Evo-2266/JsInputModuls.git"
   },
   "author": "Alex-Evo <ArkhipovAR2002@mail.ru>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Alex-Evo-2266/JsModuls/issues"
+    "url": "https://github.com/Alex-Evo-2266/JsInputModuls/issues"
   },
-  "homepage": "https://github.com/Alex-Evo-2266/JsModuls#readme"
+  "homepage": "https://github.com/Alex-Evo-2266/JsInputModuls#readme"
 }
